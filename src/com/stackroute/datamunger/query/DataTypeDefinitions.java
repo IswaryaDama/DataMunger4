@@ -7,8 +7,19 @@ public class DataTypeDefinitions {
 	 * the data type for all columns for all data types and should override
 	 * toString() method as well.
 	 */
+	String[] dataType;
+
+	public DataTypeDefinitions(String[] dataType) {
+		this.dataType = dataType;
+	}
+
 	public String[] getDataTypes() {
-		return null;
+
+		return dataType;
+	}
+
+	public void setDataTypes(String[] dataType) {
+		this.dataType = dataType;
 	}
 
 }

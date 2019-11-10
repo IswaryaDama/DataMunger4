@@ -1,7 +1,12 @@
 package com.stackroute.datamunger.reader;
 
+import java.io.BufferedReader;
 import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 import com.stackroute.datamunger.query.DataTypeDefinitions;
 import com.stackroute.datamunger.query.Header;
@@ -12,9 +17,13 @@ public class CsvQueryProcessor extends QueryProcessingEngine {
 	 * Parameterized constructor to initialize filename. As you are trying to
 	 * perform file reading, hence you need to be ready to handle the IO Exceptions.
 	 */
+	String fileName;
+	BufferedReader br = null;
 	
 	public CsvQueryProcessor(String fileName) throws FileNotFoundException {
 
+		this.fileName = fileName;
+		br = new BufferedReader(new FileReader(fileName));
 	}
 
 	/*
@@ -25,7 +34,15 @@ public class CsvQueryProcessor extends QueryProcessingEngine {
 	@Override
 	public Header getHeader() throws IOException {
 		
-		return null;
+		Header Head = null;
+
+		br.mark(1);
+		String header = br.readLine();
+		String[] head = header.split(",");
+
+		br.reset();
+		Head = new Header(head);
+		return Head;
 	}
 
 	/**
@@ -70,8 +87,65 @@ public class CsvQueryProcessor extends QueryProcessingEngine {
 		// checking for date format dd-month-yyyy
 
 		// checking for date format yyyy-mm-dd
+		
+		DataTypeDefinitions dataTypeDef = null;
+		String[] data = null;
 
-		return null;
+		br.mark(1);
+		br.readLine();
+
+		String line2 = br.readLine();
+
+		br.reset();
+
+		line2 += " ,";
+		data = line2.split(",");
+		for (String a : data) {
+			System.out.println(a);
+		}
+		if (data != null) {
+			for (int i = 0; i < data.length; i++) {
+
+				String reg = "\\d+";
+				// String str = "\\w+";
+				String dateReg = "^\\d{4}-\\d{2}-\\d{2}$|^d{2}/\\d{2}/\\d{4}$|\\^d{2}-\\d{2}-\\d{4}$";
+				// String regDate2 = "([0-9]{2})-[a-zA-Z]{3}-([0-9]{2})";
+				// String dat = "^$";
+				if ((data[i].matches(reg))) {
+					int a = Integer.parseInt(data[i]);
+					String s = ((Object) a).getClass().getName();
+					data[i] = s;
+				} else if ((data[i].matches(dateReg))) {
+					Date thisDate;
+					DateFormat dateNeed;
+					try {
+						dateNeed = new SimpleDateFormat("yyyy-MM-dd");
+						thisDate = (Date) dateNeed.parse(data[i]);
+						DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+						System.out.println(formatter.format(thisDate));
+						String s = ((Object) thisDate).getClass().getName();
+						data[i] = s;
+						// System.out.println(thisDate);
+					} catch (Exception e) {
+						e.printStackTrace();
+						System.out.println("error");
+					}
+				} else if (data[i].matches(" ")) {
+					Object obj = new Object();
+					String s = ((Object) obj).getClass().getName();
+					data[i] = s;
+				} else {
+					String s = (data[i]).getClass().getName();
+					data[i] = s;
+				}
+
+			}
+		}
+
+		// for (String i : data)
+		// System.out.println(i);
+		dataTypeDef = new DataTypeDefinitions(data);
+		return dataTypeDef;
 	}
 
 }
